@@ -38,7 +38,10 @@ module.exports = function(grunt) {
           'src/reflow.js',
           'src/dom.js',
           'src/dragdrop.js',
-          'src/view.js'
+          'src/view.js',
+          'src/dragger.js',
+          'src/loader.js',
+          'src/error.js'
         ],
         dest: 'dist/<%= pkg.name %>-<%= pkg.version %>.js'
       }

@@ -3,7 +3,7 @@
   //    TILE : LOADER
   // ------------------------------------------------------------------------
 
-  var Loader = Dash.Loader = Tile.extend({
+  var Loader = Tile.Loader = Tile.extend({
 
     initialize: function(options) {
       var that = this;
@@ -14,7 +14,7 @@
         },
         function(error) {
           options.error = error;
-          that.replaceWith(new Error(options));
+          that.replaceWith(new Tile.Error(options));
         }
       );
     }

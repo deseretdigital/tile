@@ -139,7 +139,7 @@
           this.committed = drop.dropCommit(ev, this);
         }
         if (this.autodrag) {
-          if (this.tile.isType(Dragger)) {
+          if (this.tile instanceof Tile.Dragger) {
             if (this.copyable || this.committed) this.tile.close();
             else if (this.restorable) this.tile.dragRestore();
           } else {
@@ -168,7 +168,7 @@
         tile = {
           type: Tile.Dragger,
           spawner: this.origin,
-          dd: this
+          dragData: this
         };
       }
       // Make a copy of a tile

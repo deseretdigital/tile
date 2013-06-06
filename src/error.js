@@ -3,9 +3,8 @@
   //    TILE : Error
   // ------------------------------------------------------------------------
 
-  var Error = Dash.Error = Tile.extend({
+  var Error = Tile.Error = Tile.extend({
 
-    tagName: 'ul',
     className: 'error',
 
     initialize: function(options) {
@@ -18,9 +17,9 @@
 
       this.$el.html([
         '<li><h2>Load Error!</h2></li>',
-        '<li>', 'Type: ', this.error.type, '</li>',
-        '<li>', 'Name: ', this.error.name, '</li>',
-        '<li>', 'Path: ', this.error.path, '</li>',
+        '<li>Type: ', this.error.type, '</li>',
+        '<li>Name: ', this.error.name, '</li>',
+        '<li>Path: ', this.error.path, '</li>',
       ].join(''));
 
       return this;

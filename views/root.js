@@ -12,7 +12,21 @@ define([
 
   return Positioner.extend({
 
-    el : 'body',        // Bind to DOM.body
+    /**
+     * Internal Properties
+     */
+    cover: false,         // iFrame cover status (set by schema setter)
+    $cover: null,         // iFrame cover DOM element
+    el : 'body',          // Bind to the <body> element within the DOM
+
+    /**
+     * API Schema
+     */
+    optionSchema: Tile.prototype.optionSchema.extend({
+      cover: {
+        adapter: 'setter'
+      }
+    }),
 
     /**
      * Initialize the Root View
@@ -23,6 +37,9 @@ define([
 
       // Add to Tile namespace
       Tile.root = this;
+
+      // Create the iframe cover
+      this.$cover = $('<div class="cover" />');
 
       // Immediately measure but don't trigger reflow
       this.measureInner(true);
@@ -61,6 +78,28 @@ define([
         innerHeight: window.innerHeight
         }, silent
       );
+    },
+
+    /**
+     * iFrame Cover Setter
+     */
+    setCover: function(status) {
+      if (this.cover && !status) {
+        this.$cover.detach();
+      }
+      else if (!this.cover && status) {
+        this.$cover
+          .css('cursor', _.isString(status) ? status : '')
+          .prependTo(this.$el);
+      }
+      this.cover = status ? true : false;
+    },
+
+    /**
+     * iFrame Cover Getter
+     */
+    getCover: function(value) {
+      return this.cover;
     }
 
   });
