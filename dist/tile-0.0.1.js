@@ -1,4 +1,4 @@
-/*! tile - v0.0.1 - 2013-06-05 */
+/*! tile - v0.0.1 - 2013-06-06 */
 define(['jQuery', 'Underscore', 'Backbone'],
   function($, _, Backbone) {
 
@@ -726,8 +726,8 @@ Tile.Schema = function(localBindings, childBindings) {
     this.zones = [];
 
     // Bubble up the tree to find active drag handler
-    while (!tile.dragInit(ev, this)) {
-      tile = tile.parent;
+    while (tile && !tile.dragInit(ev, this)) {
+      tile = tile.parentView;
     }
     // Found handler
     if (tile) {
@@ -927,7 +927,7 @@ Tile.Schema = function(localBindings, childBindings) {
       }
       // Recurse to the children tiles
       else {
-        _.each(this.tiles, function(tile) {
+        _.each(this.childViews, function(tile) {
           Dragdrop.prototype.zoneInit.call(tile, ev, dd, index);
         });
       }
@@ -1260,7 +1260,7 @@ Tile.Schema = function(localBindings, childBindings) {
      * @param {object} view
      */
     indexOf: function(view) {
-      return _.indexOf(this.childViews.length, view);
+      return _.indexOf(this.childViews, view);
     },
 
     /**

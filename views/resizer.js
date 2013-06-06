@@ -5,14 +5,14 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
   //    VIEW : RESIZER
   // ------------------------------------------------------------------------
 
-  var MIN_SIZE = 20
-    , vproto = Tile.View.prototype
+  var vproto = Tile.View.prototype
     , round	= Math.round
     , floor = Math.floor
+    , abs = Math.abs
 
     , Edge = Tile.View.extend({
-      isEdge: true,
-      className: 'view edge drag'
+      className: 'tile edge drag',
+      isEdge: true
     });
 
   return Tile.View.extend({
@@ -60,6 +60,11 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         flowFlags: FLOW_SUPER,
         filter: 'boolean',
         defaultValue: true
+      },
+      minsize: {
+        flowFlags: FLOW_SUPER,
+        filter: 'integer',
+        defaultValue: 20
       }
     }),
 
@@ -255,7 +260,6 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         off += px;
 
         view.flow({
-          size: px,
           innerWidth: wsize,
           innerHeight: hsize
         });
@@ -288,13 +292,12 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
     dragStart: function(ev, dd) {
       //Tile.root.set('cover', this.axisTo('col-resize', 'row-resize'));
 
-      dd.index = this.indexOf(dd.tile) + 1;
-      dd.len = this.childCount();
+      var side = this.axisTo('innerWidth', 'innerHeight');
+      this._index = _.indexOf(this.childViews, dd.tile);
 
       // take a snapshot of the current child sizes
       _.each(this.childViews, function(view) {
-        var options = view.options;
-        options._size = options.size;
+        view._size = view.options[side];
       });
     },
 
@@ -305,48 +308,41 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
      * @param {object} dd (dash drag-and-drop object)
      */
     dragMove: function(ev, dd) {
-      var off = this.axisTo(dd.deltaX, dd.deltaY)
-        , after = off > 0;
+      var total = this.axisTo(dd.deltaX, dd.deltaY)
+        , inc = total > 0 ? 1 : -1
+        , views = this.childViews
+        , length = views.length;
 
       Tile.reflow.block();
 
-      var carry = this.dragShift(dd,
-        dd.index - (after ? 0 : 1),
-        after ? off : -off,
-        after ? 1 : -1
-      );
-
-      this.dragShift(dd,
-        dd.index - (after ? 1 : 0),
-        carry + (after ? -off : off),
-        after ? -1 : 1
-      );
+      total = abs(total);
+      var carry = this._shift(this._index, inc, total, length, views);
+      var view = this.childViews[this._index - inc];
+      view.set({ size: view._size + total - carry });
 
       Tile.reflow.unblock();
     },
 
     /**
-     * Recursively resize siblings in one direction
-     *
-     * @param {object} dd (dash drag-and-drop object)
-     * @param {integer} index (index of child to resize)
-     * @param {integer} offset (amount to shift child)
-     * @param {integer} next (amount to pass on to next sibling)
+     * Shift the tiles during a drag
      */
-    dragShift: function(dd, index, offset, next) {
-      if (index < 0 || index == dd.len) return offset;
+    _shift: function(index, inc, total, length, views) {
+      if (total && (index += inc) >= 0 && index < length) {
+        var view = views[index]
+          , min = view.options.minsize
+          , size;
 
-      var overflow = 0
-        , view = this.viewAt(index)
-        , size = view.options._size - offset;
-
-      if (size < MIN_SIZE) {
-        overflow = MIN_SIZE - size;
-        size = MIN_SIZE;
+        if (!view.isEdge) {
+          size = view._size - total;
+          if (size < min) {
+            total = min - size;
+            size = min;
+          } else total = 0;
+          view.set({ size: size });
+        }
+        this._shift(index, inc, total, length, views);
       }
-      view.set({ size: size });
-
-      return this.dragShift(dd, index + next, overflow, next);
+      return total;
     }
 
   });

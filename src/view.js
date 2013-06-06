@@ -232,7 +232,7 @@
      * @param {object} view
      */
     indexOf: function(view) {
-      return _.indexOf(this.childViews.length, view);
+      return _.indexOf(this.childViews, view);
     },
 
     /**
