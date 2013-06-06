@@ -1379,7 +1379,6 @@ Tile.Schema = function(localBindings, childBindings) {
         }
         // use default view type
         if (view.type === undefined) {
-          console.log("UNDEFINED", this.childType, this.type);
           view.type = this.childType;
         }
         // look-up the view type
@@ -1391,7 +1390,6 @@ Tile.Schema = function(localBindings, childBindings) {
           Type = Tile.Loader;
         }
       }
-      console.log("TYPE", Type, view);
       return (new Type(view)).render();
     },
 

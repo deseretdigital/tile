@@ -26,7 +26,6 @@ define(['Tile'], function(Tile) {
         View.prototype.type = name;
 
         // Add default child type if defined to true
-        console.log("load", name, View.prototype.childType);
         if (View.prototype.childType === true) {
           View.prototype.childType = name;
         }

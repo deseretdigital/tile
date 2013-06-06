@@ -352,7 +352,6 @@
         }
         // use default view type
         if (view.type === undefined) {
-          console.log("UNDEFINED", this.childType, this.type);
           view.type = this.childType;
         }
         // look-up the view type
@@ -364,7 +363,6 @@
           Type = Tile.Loader;
         }
       }
-      console.log("TYPE", Type, view);
       return (new Type(view)).render();
     },
 
