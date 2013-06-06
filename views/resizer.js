@@ -9,7 +9,11 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
     , vproto = Tile.View.prototype
     , round	= Math.round
     , floor = Math.floor
-    , Edge = Tile.View.extend({ className: 'view edge drag' });
+
+    , Edge = Tile.View.extend({
+      isEdge: true,
+      className: 'view edge drag'
+    });
 
   return Tile.View.extend({
 
@@ -51,6 +55,11 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         flowFlags: FLOW_SUPER,
         filter: 'integer',
         defaultValue: 0
+      },
+      flex: {
+        flowFlags: FLOW_SUPER,
+        filter: 'boolean',
+        defaultValue: true
       }
     }),
 
@@ -63,19 +72,6 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       return (this.childViews.length < 2
         && this.parentView
         && this.options.prune);
-    },
-
-    /**
-     * Simple routine to determine if a view is an edge
-     *
-     * @param {integer|object} index of child, or a child
-     * @param {boolean} true if an edge
-     */
-    isEdge: function(view) {
-      if (_.isNumber(view)) {
-        view = this.childViews[view];
-      }
-      return (view instanceof Edge);
     },
 
     /**
@@ -135,8 +131,9 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       var views = [];
 
       for (var i = 0, l = this.childViews.length; i < l; i++) {
-        if (!this.isEdge(i)) {
-          views.push(this.childViews[i].get());
+        var view = this.childViews[i];
+        if (!view.isEdge) {
+          views.push(view.get());
         }
       }
       return views;
@@ -176,7 +173,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       detach.call(this, view);
 
       var edge = this.childViews[index * 2 - offset];
-      if (edge && this.isEdge(edge)) {
+      if (edge && edge.isEdge) {
         detach.call(this, edge).close();
       }
       Tile.reflow.schedule(JOB_PRUNE, this);
@@ -210,7 +207,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       var tpc = 0, cpc = 0, cno = 0, px, i, view
         , opts = this.options
         , end = this.childViews.length - 1
-        , ex = this.options.edging
+        , edging = this.options.edging
         , wx = opts.innerWidth
         , hx = opts.innerHeight
         , hz = this.axisTo(true, false)
@@ -221,10 +218,12 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       // calculate aggregate totals
       for (i = 0; i <= end; i++) {
         view = this.childViews[i];
-        if (this.isEdge(view)) tx -= ex;
-        else if (!view.size) cno++;
+        opts = view.options;
+        if (view.isEdge) tx -= edging;
+        else if (!opts.size) cno++;
+        else if (!opts.flex) tx -= opts.size;
         else {
-          tpc += view.size;
+          tpc += opts.size;
           cpc++;
         }
       }
@@ -236,9 +235,10 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         opts = view.options;
 
         if (i == end) px = ax;
-        else if (this.isEdge(view)) px = ex;
-        else if (!view.size) px = round((avg * tx) / 100);
-        else px = round((view.size * avg * cpc * tx) / (tpc * 100));
+        else if (view.isEdge) px = edging;
+        else if (!opts.size) px = round((avg * tx) / 100);
+        else if (!opts.flex) px = opts.size;
+        else px = round((opts.size * avg * cpc * tx) / (tpc * 100));
         ax -= px;
 
         var wsize = hz ? px : wx;
@@ -249,12 +249,13 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
           height: hsize - opts.padHeight,
           left: hz ? off : '',
           top: hz ? '' : off,
-          cursor: !this.isEdge(view) ? '' : hz ? 'col-resize' : 'row-resize'
+          cursor: !view.isEdge ? '' : hz ? 'col-resize' : 'row-resize'
         });
 
         off += px;
 
         view.flow({
+          size: px,
           innerWidth: wsize,
           innerHeight: hsize
         });
@@ -285,19 +286,16 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
      * @param {object} dd (dash drag-and-drop object)
      */
     dragStart: function(ev, dd) {
-      Tile.root.set('cover', this.axisTo('col-resize', 'row-resize'));
+      //Tile.root.set('cover', this.axisTo('col-resize', 'row-resize'));
 
-      dd.axis = this.axisTo('innerWidth', 'innerHeight');
       dd.index = this.indexOf(dd.tile) + 1;
       dd.len = this.childCount();
-      dd.sizes = [];
-      dd.sum = 0;
 
-      for (var i = 0; i < dd.len; i++) {
-        var size = this.viewAt(i).options[dd.axis];
-        dd.sizes.push(size);
-        dd.sum += size;
-      }
+      // take a snapshot of the current child sizes
+      _.each(this.childViews, function(view) {
+        var options = view.options;
+        options._size = options.size;
+      });
     },
 
     /**
@@ -310,16 +308,21 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       var off = this.axisTo(dd.deltaX, dd.deltaY)
         , after = off > 0;
 
+      Tile.reflow.block();
+
       var carry = this.dragShift(dd,
         dd.index - (after ? 0 : 1),
         after ? off : -off,
         after ? 1 : -1
       );
+
       this.dragShift(dd,
         dd.index - (after ? 1 : 0),
         carry + (after ? -off : off),
         after ? -1 : 1
       );
+
+      Tile.reflow.unblock();
     },
 
     /**
@@ -334,31 +337,14 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       if (index < 0 || index == dd.len) return offset;
 
       var overflow = 0
-        , size = dd.sizes[index] - offset
-        , view = this.viewAt(index);
-
-console.log("a", size, index, offset, dd.sizes);
+        , view = this.viewAt(index)
+        , size = view.options._size - offset;
 
       if (size < MIN_SIZE) {
         overflow = MIN_SIZE - size;
         size = MIN_SIZE;
       }
-console.log("b", size);
-      view.options.size = round((size / dd.sum) * 1000);
-
-      var opts = {};
-      opts[dd.axis] = size;
-
-      console.log({
-        innerWith: dd.axis == 'width' ? size : view.options.innerWidth,
-        innerHeight: dd.axis == 'height' ? size : view.options.innerHeight
-      });
-
-      view.flow({
-        innerWith: dd.axis == 'width' ? size : view.options.innerWidth,
-        innerHeight: dd.axis == 'height' ? size : view.options.innerHeight
-      });
-      //this.renderView(view, opts);
+      view.set({ size: size });
 
       return this.dragShift(dd, index + next, overflow, next);
     }
