@@ -7,7 +7,16 @@
     type: null,                   // {string} set by require view plugin
     className: 'tile',            // {string} css class name
 
-    // Option Params
+    /**
+     * Option Schema - defines the public API for the tile object
+     *
+     * @param {string} adapter = 'setter' | 'property' | 'options' (default)
+     * @param {string} filter = 'integer' | 'boolean' | 'string' | 'options' | undefined (default)
+     * @param {boolean} isPrivate = true | false (default)
+     * @param {*} defaultValue = undefined (default)
+     * @param {integer} flowFlags = FLOW_SIZED | FLOW_LOCAL | FLOW_SUPER | FLOW_STYLED | undefined (default)
+     * @param {object} options = { name: value ... } (for use with options filter)
+     */
     optionSchema: Tile.Schema({   // {object} option bindings
       views: {
         adapter: 'setter'
@@ -69,6 +78,9 @@
     flowViews: null,              // {array} Reflow Traced Views
     flowFlags: 0,                 // {integer} Reflow State flags
     flowJobs: 0,                  // {integer} Reflow Job flags
+
+    // Default Values
+    childType: null,              // {string|true} string=default. true=same as parent
 
     // Internal Bookkeeping
     _styleHash: null,             // {string} DOM tag & class path names
@@ -168,14 +180,14 @@
     },
 
      /**
-     * Get debugging information
+     * DEBUGGING : Output the tree to the console
      */
-    debug: function(level) {
+    logTree: function(level) {
       level || (level = 1);
       console.log(emptyStr(level) + this.cid + ' (' + this.type + ')');
       if (this.type != 'dash/widget') {
         for (var i = 0, l = this.childViews.length; i < l; i++) {
-          this.childViews[i].debug(level + 2);
+          this.childViews[i].logTree(level + 2);
         }
       }
     },
@@ -338,6 +350,11 @@
         if (_.isObject(extend)) {
           view = _.extend({}, view, extend);
         }
+        // use default view type
+        if (view.type === undefined) {
+          console.log("UNDEFINED", this.childType, this.type);
+          view.type = this.childType;
+        }
         // look-up the view type
         if (_.isString(view.type)) {
           Type = Tile.Views[view.type];
@@ -347,6 +364,7 @@
           Type = Tile.Loader;
         }
       }
+      console.log("TYPE", Type, view);
       return (new Type(view)).render();
     },
 

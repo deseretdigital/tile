@@ -76,8 +76,7 @@
      */
     function dispatch() {
       if (blocked || cycles || !jobs) return;
-//console.log("REFLOW.dispatch(",jobs,")");
-      console.time('DOM_REFLOW_TIME');
+//      console.time('DOM_REFLOW_TIME');
 
       cycles = 3;
 
@@ -101,7 +100,7 @@
 
       // measure time for DOM to reflow
       _.defer(function() {
-        console.timeEnd('DOM_REFLOW_TIME');
+//        console.timeEnd('DOM_REFLOW_TIME');
       });
     }
 

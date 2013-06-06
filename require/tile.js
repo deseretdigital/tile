@@ -25,6 +25,12 @@ define(['Tile'], function(Tile) {
         // Add the normalized name to the tile as .type
         View.prototype.type = name;
 
+        // Add default child type if defined to true
+        console.log("load", name, View.prototype.childType);
+        if (View.prototype.childType === true) {
+          View.prototype.childType = name;
+        }
+
         // Return the tile as the loaded value
         onload(View);
 
