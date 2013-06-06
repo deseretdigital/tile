@@ -6,7 +6,8 @@
   // Global Job Flags
   JOB_PRUNE = 1;
   JOB_PRESIZE = 2;
-  JOB_TRACE = 4;  
+  JOB_TRACE = 4;
+  JOB_RENDER = 8;
 
   // Global Child Flow Flags
   FLOW_LOCAL = 1;      // Set when local options change (by schema.local{}) -> use during flow to re-layout

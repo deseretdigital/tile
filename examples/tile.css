@@ -278,3 +278,10 @@ a {
 
 .menu.popout li:hover {
   background-color: #ddd; }
+
+.button {
+    background: blanchedalmond;
+    padding: 6px;
+    border: 1px solid #555;
+    font-weight: bold;
+}

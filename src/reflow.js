@@ -13,6 +13,10 @@
         jobs = 0,             // To know when there are jobs to be done
         queues = {};
 
+    queues[JOB_RENDER] = {
+      jobs: [],
+      method: 'render'
+    }
     /**
      * For resizer to prune itself
      */
