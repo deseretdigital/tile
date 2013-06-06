@@ -3,7 +3,7 @@
   //    TILE : DRAGGER (for containing HTML elements for drag-and-drop)
   // ------------------------------------------------------------------------
 
-  var Dragger = Tile.Dragger = Tile.extend({
+  var Dragger = Tile.Dragger = Tile.View.extend({
 
     /**
      * Internal Properties
@@ -15,7 +15,7 @@
     /**
      * API Schema
      */
-    optionSchema: Tile.prototype.optionSchema.extend({
+    optionSchema: Tile.View.prototype.optionSchema.extend({
       dragData: {
         adapter: 'setter',
         isPrivate: true

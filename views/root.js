@@ -22,7 +22,7 @@ define([
     /**
      * API Schema
      */
-    optionSchema: Tile.prototype.optionSchema.extend({
+    optionSchema: Positioner.prototype.optionSchema.extend({
       cover: {
         adapter: 'setter'
       }

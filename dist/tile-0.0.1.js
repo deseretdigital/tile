@@ -1727,7 +1727,7 @@ Tile.Schema = function(localBindings, childBindings) {
   //    TILE : DRAGGER (for containing HTML elements for drag-and-drop)
   // ------------------------------------------------------------------------
 
-  var Dragger = Tile.Dragger = Tile.extend({
+  var Dragger = Tile.Dragger = Tile.View.extend({
 
     /**
      * Internal Properties
@@ -1739,7 +1739,7 @@ Tile.Schema = function(localBindings, childBindings) {
     /**
      * API Schema
      */
-    optionSchema: Tile.prototype.optionSchema.extend({
+    optionSchema: Tile.View.prototype.optionSchema.extend({
       dragData: {
         adapter: 'setter',
         isPrivate: true
@@ -1810,7 +1810,7 @@ Tile.Schema = function(localBindings, childBindings) {
   //    TILE : LOADER
   // ------------------------------------------------------------------------
 
-  var Loader = Tile.Loader = Tile.extend({
+  var Loader = Tile.Loader = Tile.View.extend({
 
     initialize: function(options) {
       var that = this;
@@ -1833,7 +1833,7 @@ Tile.Schema = function(localBindings, childBindings) {
   //    TILE : Error
   // ------------------------------------------------------------------------
 
-  var Error = Tile.Error = Tile.extend({
+  var Error = Tile.Error = Tile.View.extend({
 
     className: 'error',
 

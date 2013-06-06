@@ -3,7 +3,7 @@
   //    TILE : Error
   // ------------------------------------------------------------------------
 
-  var Error = Tile.Error = Tile.extend({
+  var Error = Tile.Error = Tile.View.extend({
 
     className: 'error',
 

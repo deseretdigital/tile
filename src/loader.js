@@ -3,7 +3,7 @@
   //    TILE : LOADER
   // ------------------------------------------------------------------------
 
-  var Loader = Tile.Loader = Tile.extend({
+  var Loader = Tile.Loader = Tile.View.extend({
 
     initialize: function(options) {
       var that = this;
