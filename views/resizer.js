@@ -17,7 +17,10 @@ define([
     , Edge = Tile.View.extend({
       className: 'tile edge drag',
       isEdge: true,
-      type: '_edge'
+      type: '_edge',
+      options: {
+        flex: false
+      }
     });
 
   return Flexer.extend({

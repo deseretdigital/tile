@@ -5,7 +5,11 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
   //    VIEW : RESIZER
   // ------------------------------------------------------------------------
 
-  var round	= Math.round;
+  var round	= Math.round
+    , FIXED_AUTO = 0        // Fixed-Auto sizing (flex: false, size: 0)
+    , FIXED_SIZE = 1        // Fixed sizing (flex: false, size: 1234)
+    , FLEX_AUTO = 2         // Flex-Auto sizing (flex: true, size: 0)
+    , FLEX_SIZE = 3;        // Flex sizing (flex: true, size: 1234)
 
   return Tile.View.extend({
 
@@ -36,6 +40,17 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
           vertical: 2
         },
         defaultValue: 0
+      },
+      align: {
+        flowFlags: FLOW_SUPER,
+        filter: 'options',
+        options: {
+          start: 0,
+          end: 1,
+          center: 2,
+          stretch: 3
+        },
+        defaultValue: 3
       },
       prune: {
         flowFlags: FLOW_LOCAL,
@@ -83,67 +98,210 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
       return (this.options.axis || superAxis) == 1 ? w : h;
     },
 
-    // --------------------------------------------------------------------
-    //    Render
-    // --------------------------------------------------------------------
+    /**
+     * Trace the changes as they bubble up
+     *
+     * @param {object} orig (origin tile of change event)
+     * @param {object} child (child tile of change path)
+     * @param {integer} depth (depth of change path)
+     */
+    traceChange: function(orig, child, depth) {
+      if (depth == 1) {
+        var flags = child.flowFlags
+          , options = child.options;
 
-    layout: function() {
-      var tpc = 0, cpc = 0, cno = 0, px, i, view
-        , opts = this.options
-        , end = this.childViews.length - 1
-        , edging = this.options.edging
-        , wx = opts.innerWidth
-        , hx = opts.innerHeight
-        , hz = this.axisTo(true, false)
-        , tx = hz ? wx : hx
-        , ax = tx
-        , off = 0;
+        // Determine Child Flow Mode
+        // _mode = FIXED_AUTO | FIXED_SIZE | FLEX_AUTO | FLEX_SIZE
+        if (flags & Tile.SUPER_ADDED) {
+          options._mode = (options.size ? 1 : 0) + (options.flex ? 2 : 0);
+        }
 
-      // calculate aggregate totals
-      for (i = 0; i <= end; i++) {
-        view = this.childViews[i];
-        opts = view.options;
-        if (view.isEdge) tx -= edging;
-        else if (!opts.size) cno++;
-        else if (!opts.flex) tx -= opts.size;
-        else {
-          tpc += opts.size;
-          cpc++;
+        // Measure new or rendered children that are FIXED_AUTO
+        if (flags & Tile.RENDERED_ADDED
+          && (options._mode == FIXED_AUTO || this.options.align != 3)) {
+
+          child.measureInner();
+
+          // If measurement is different than known size, flag re-layout
+          if (flags & Tile.FLOW_SIZED) {
+            this.flowFlags |= Tile.FLOW_VIEW;
+          }
         }
       }
-      var avg = 100 / (cno + cpc);
+    },
 
-      // size all the children
-      for (i = 0; i <= end; i++) {
-        view = this.childViews[i];
-        opts = view.options;
+    /**
+     * Re-Calculate the children's Layout
+     */
+    layout: function() {
+      var i, view
+        , options = this.options
+        , align = options.align
+        , views = this.childViews
+        , end = views.length
+        , row = this.axisTo(true, false)
+        , axisSize = row ? options.innerWidth : options.innerHeight
+        , flipSize = row ? options.innerHeight : options.innerWidth
+        , flexSize = 0
+        , flexAvg = 0
+        , flexMult
+        , autoCount = 0
+        , sizeCount = 0
+        , offset = 0
+        , carry = 0.01
+        , innerSize
+        , outerSize
+        , crossSize
+        , crossBeg
+        , crossEnd
+        , flowAxis
+        , flowCross
+        , pad
+        , val
+        , dims
+        ;
 
-        if (i == end) px = ax;
-        else if (view.isEdge) px = edging;
-        else if (!opts.size) px = round((avg * tx) / 100);
-        else if (!opts.flex) px = opts.size;
-        else px = round((opts.size * avg * cpc * tx) / (tpc * 100));
-        ax -= px;
+      // ------------------------------------------------------------------
+      //    Calculate the Flex Direction Values
+      // ------------------------------------------------------------------
 
-        var wsize = hz ? px : wx;
-        var hsize = hz ? hx : px;
+      for (i = 0; i < end; i++) {
+        options = views[i].options;
+        options._pad = pad = row ? options.padWidth : options.padHeight;
 
-        view.$el.css({
-          width: wsize - opts.padWidth,
-          height: hsize - opts.padHeight,
-          left: hz ? off : '',
-          top: hz ? '' : off,
-          cursor: !view.isEdge ? '' : hz ? 'col-resize' : 'row-resize'
-        });
+        switch (options._mode) {
+          case FIXED_AUTO:
+            options._size = row ? options.innerWidth : options.innerHeight;
+            options.outerSize = options._size + pad;
+            axisSize -= options.outerSize;
+            break;
 
-        off += px;
+          case FIXED_SIZE:
+            options.outerSize = options.size + pad;
+            axisSize -= options.outerSize;
+            break;
 
-        view.flow({
-          innerWidth: wsize,
-          innerHeight: hsize
-        });
+          case FLEX_AUTO:
+            autoCount++;
+            break;
+
+          case FLEX_SIZE:
+            sizeCount++;
+            flexSize += options.size;
+        }
       }
-      return this;
+
+      flexAvg = sizeCount ? round(flexSize / sizeCount) : 10;
+      flexSize += flexAvg * autoCount;
+      flexMult = axisSize / flexSize;
+
+      // ------------------------------------------------------------------
+      //    Calculate the Child Size
+      // ------------------------------------------------------------------
+
+      for (i = 0; i < end; i++) {
+        view = views[i];
+        options = view.options;
+
+        // ------------------------------------------------------------------
+        //    Calculate the Axis Size
+        // ------------------------------------------------------------------
+
+        switch (options._mode) {
+          case FIXED_AUTO:
+            innerSize = '';
+            outerSize = options.outerSize;
+            flowAxis = undefined;
+            break;
+
+          case FIXED_SIZE:
+            innerSize = options.size;
+            outerSize = options.outerSize;
+            flowAxis = innerSize;
+            break;
+
+          case FLEX_AUTO:
+          case FLEX_SIZE:
+            val = ((options.size || flexAvg) * flexMult) + carry;
+            outerSize = val | 0;
+            carry = val % 1;
+            innerSize = outerSize - options._pad;
+            flowAxis = innerSize;
+        }
+
+        // ------------------------------------------------------------------
+        //    Calculate the Cross Size
+        // ------------------------------------------------------------------
+
+        switch (align) {
+          case 0: // start
+            crossSize = '';
+            crossBeg = 0;
+            crossEnd = '';
+            flowCross = undefined;
+            break;
+
+          case 1: // end
+            crossSize = '';
+            crossBeg = '';
+            crossEnd = 0;
+            flowCross = undefined;
+            break;
+
+          case 2: // center
+            crossSize = (row ? options.innerHeight : options.innerWidth)
+              + (row ? options.padHeight : options.padWidth);
+            crossBeg = round((flipSize - crossSize) / 2);
+            crossEnd = '';
+            flowCross = undefined;
+            break;
+
+          case 3: // stretch
+            crossSize = '';
+            crossBeg = 0;
+            crossEnd = 0;
+            flowCross = flipSize - (row ? options.padHeight : options.padWidth);
+        }
+
+        // ------------------------------------------------------------------
+        //    Set the child CSS Geometry
+        // ------------------------------------------------------------------
+
+        view.$el.css(row ? {
+          width: innerSize,
+          height: crossSize,
+          left: offset,
+          right: '',
+          top: crossBeg,
+          bottom: crossEnd
+        } : {
+          width: crossSize,
+          height: innerSize,
+          left: crossBeg,
+          right: crossEnd,
+          top: offset,
+          bottom: ''
+        });
+
+        offset += outerSize;
+
+        // ------------------------------------------------------------------
+        //    Set the child flow dimensions
+        // ------------------------------------------------------------------
+
+        dims = undefined;
+        if (flowAxis !== undefined) {
+          if (!dims) dims = {};
+          if (row) dims.innerWidth = flowAxis;
+          else dims.innerHeight = flowAxis;
+        }
+        if (flowCross !== undefined) {
+          if (!dims) dims = {};
+          if (row) dims.innerHeight = flowCross;
+          else dims.innerWidth = flowCross;
+        }
+        view.flow(dims);
+      }
     }
 
   });

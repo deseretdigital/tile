@@ -15,7 +15,7 @@
 
     queues[JOB_RENDER] = {
       jobs: [],
-      method: 'render'
+      method: 'renderView'
     }
     /**
      * For resizer to prune itself

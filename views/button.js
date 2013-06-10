@@ -10,18 +10,18 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
             optionSchema: Tile.View.prototype.optionSchema.extend({
                 icon: {
                     filter: 'string',
-                    flowFlags: FLOW_LOCAL|FLOW_SUPER,
-                    flowJob: JOB_RENDER
+                    flowFlags: Tile.FLOW_LOCAL,
+                    flowJob: Tile.JOB_RENDER
                 },
                 title: {
                     filter: 'string',
-                    flowFlags: FLOW_LOCAL|FLOW_SUPER,
-                    flowJob: JOB_RENDER
+                    flowFlags: Tile.FLOW_LOCAL,
+                    flowJob: Tile.JOB_RENDER
                 },
                 mode: {
                     filter: 'options',
-                    flowFlags: FLOW_LOCAL|FLOW_SUPER,
-                    flowJob: JOB_RENDER,
+                    flowFlags: Tile.FLOW_LOCAL,
+                    flowJob: Tile.JOB_RENDER,
                     options: {
                         toggle: 1,
                         momentary: 0
@@ -30,20 +30,19 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
                 },
                 state: {
                     filter: 'boolean',
-                    flowFlags: FLOW_LOCAL|FLOW_SUPER,
-                    flowJob: JOB_RENDER,
+                    flowFlags: Tile.FLOW_LOCAL,
+                    flowJob: Tile.JOB_RENDER,
                     defaultValue: false
                 },
                 show: {
                     filter: 'boolean',
-                    flowFlags: FLOW_LOCAL|FLOW_SUPER,
-                    flowJob: JOB_RENDER,
+                    flowFlags: Tile.FLOW_LOCAL,
+                    flowJob: Tile.JOB_RENDER,
                     defaultValue: true
                 }
             },{}),
             render: function() {
-                console.log('is this rendering?');
-                this.$el.html(this.options.title + ' test text ?');
+                this.$el.html(this.options.title);
                 this.$el.toggle(this.options.show);
                 return this;
             }

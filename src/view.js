@@ -131,6 +131,8 @@
      * @param {object} options (view options)
      */
     _configure: function(options) {
+
+      // import backbone options before dealing with schema options
       if (this.options) options = _.extend({}, this.options, options);
       for (var i = 0, l = viewOptions.length; i < l; i++) {
         var attr = viewOptions[i];
@@ -139,6 +141,7 @@
           delete options[attr];
         }
       }
+
       // initialize the dash view parameters
       this.optionBuffer = options;
       this.options = {};
@@ -363,7 +366,10 @@
           Type = Tile.Loader;
         }
       }
-      return (new Type(view)).render();
+      // Create the view & schedule render
+      view = (new Type(view));
+      view.scheduleJob(JOB_RENDER);
+      return view;
     },
 
     /**
@@ -438,6 +444,15 @@
     },
 
     /**
+     * Schedule a job for this tile
+     *
+     * @param {integer} job (flag)
+     */
+    scheduleJob: function(job) {
+      Tile.reflow.schedule(job, this);
+    },
+
+    /**
      * Set attribute values & schedule reflow
      *
      * @param {object} options (view options)
@@ -463,6 +478,14 @@
      */
     get: function(name) {
       return this.optionSchema.get(this, name);
+    },
+
+    /**
+     * Wrapper for rendering and flagging via a reflow job
+     */
+    renderView: function() {
+      this.render();
+      this.setFlag(FLOW_RENDERED);
     },
 
     /**
@@ -492,7 +515,7 @@
       }
 
       // Trigger change on view
-      this.traceChange(this, null, 0);
+      //this.traceChange(this, null, 0);
 
       // recurse up the tree
       if (this.parentView) {
