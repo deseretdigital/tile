@@ -10,7 +10,7 @@
 
       require(['tile!' + options.type],
         function(Tile) {
-          that.replaceWith(new Tile(options));
+          that.replaceWith(options);
         },
         function(error) {
           options.error = error;

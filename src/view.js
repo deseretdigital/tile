@@ -359,7 +359,7 @@
         }
         // look-up the view type
         Type = Tile.Views[view.type] || view.type;
-        
+
         // default to loader if not valid
         if (!_.isFunction(Type)) {
           Type = Tile.Loader;
@@ -384,7 +384,7 @@
      * Detach a child view from this
      */
     detachView: function(view) {
-      view.parent = null;
+      view.parentView = null;
       view.$el.detach();
       this.childViews = _.without(this.childViews, view);
       this.setFlag(FLOW_VIEWS);
@@ -399,7 +399,8 @@
       if (!this.parentView) return;
 
       Tile.reflow.block();
-      this.parentView.addView(view, this.parentView.indexOf(this));
+      var index = this.parentView.indexOf(this);
+      this.parentView.addView(view, index);
       this.detachThis();
       Tile.reflow.unblock();
     },

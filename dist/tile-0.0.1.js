@@ -541,14 +541,9 @@ Tile.Schema = function(localBindings, childBindings) {
 
       cycles = 3;
 
-//console.log("DISPATCH---------------------");
       // reflow job queue loop
       while (cycles-- && jobs) {
         for (var type in queues) {
-
-//if (cycles < 3) {
-//  console.log("CYCLES", cycles, type, queues[type].jobs.length, jobs);
-//}
           runQueue(type, queues[type]);
         }
         // start the depth-first flow tree traversal
@@ -1402,7 +1397,7 @@ Tile.Schema = function(localBindings, childBindings) {
         }
         // look-up the view type
         Type = Tile.Views[view.type] || view.type;
-        
+
         // default to loader if not valid
         if (!_.isFunction(Type)) {
           Type = Tile.Loader;
@@ -1427,7 +1422,7 @@ Tile.Schema = function(localBindings, childBindings) {
      * Detach a child view from this
      */
     detachView: function(view) {
-      view.parent = null;
+      view.parentView = null;
       view.$el.detach();
       this.childViews = _.without(this.childViews, view);
       this.setFlag(FLOW_VIEWS);
@@ -1442,7 +1437,8 @@ Tile.Schema = function(localBindings, childBindings) {
       if (!this.parentView) return;
 
       Tile.reflow.block();
-      this.parentView.addView(view, this.parentView.indexOf(this));
+      var index = this.parentView.indexOf(this);
+      this.parentView.addView(view, index);
       this.detachThis();
       Tile.reflow.unblock();
     },
@@ -1855,7 +1851,7 @@ Tile.Schema = function(localBindings, childBindings) {
 
       require(['tile!' + options.type],
         function(Tile) {
-          that.replaceWith(new Tile(options));
+          that.replaceWith(options);
         },
         function(error) {
           options.error = error;

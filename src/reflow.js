@@ -84,14 +84,9 @@
 
       cycles = 3;
 
-//console.log("DISPATCH---------------------");
       // reflow job queue loop
       while (cycles-- && jobs) {
         for (var type in queues) {
-
-//if (cycles < 3) {
-//  console.log("CYCLES", cycles, type, queues[type].jobs.length, jobs);
-//}
           runQueue(type, queues[type]);
         }
         // start the depth-first flow tree traversal

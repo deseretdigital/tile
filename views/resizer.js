@@ -116,13 +116,12 @@ define([
      * @return {object} view
      */
     _attachView: function(view, index) {
-      var attach = vproto._attachView
-        , pos = (index === undefined) ? undefined : index * 2;
+      var pos = (index === undefined) ? undefined : index * 2;
 
       if (this.childCount()) {
-        attach.call(this, this._toView(Edge), pos);
+        vproto._attachView.call(this, this._toView(Edge), pos);
       }
-      attach.call(this, view, pos);
+      vproto._attachView.call(this, view, pos);
 
       return view;
     },
@@ -133,18 +132,20 @@ define([
      *
      * @param {object} view to detach
      */
-    _detachView: function(view) {
-      var detach = vproto._detachView
-        , index = this.indexOf(view)
+    detachView: function(view) {
+      var index = this.indexOf(view)
         , offset = (index < (this.childCount() - 1) ? 0 : 1);
 
-      detach.call(this, view);
+console.log("detachView", view.cid);
+      vproto.detachView.call(this, view);
 
       var edge = this.childViews[index * 2 - offset];
       if (edge && edge.isEdge) {
-        detach.call(this, edge).close();
+        console.log("detachEdge", edge.cid);
+        edge.close();
+        //vproto.detachView.call(this, edge); //.close();
       }
-      Tile.reflow.schedule(JOB_PRUNE, this);
+     // Tile.reflow.schedule(JOB_PRUNE, this);
     },
 
     /**
