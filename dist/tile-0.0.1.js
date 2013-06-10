@@ -1,4 +1,4 @@
-/*! tile - v0.0.1 - 2013-06-07 */
+/*! tile - v0.0.1 - 2013-06-10 */
 define(['jQuery', 'Underscore', 'Backbone'],
   function($, _, Backbone) {
 
@@ -12,10 +12,10 @@ define(['jQuery', 'Underscore', 'Backbone'],
    */
 
   // Global Job Flags
-  Tile.JOB_PRUNE = JOB_PRUNE = 1;
-  Tile.JOB_PRESIZE = JOB_PRESIZE = 2;
-  Tile.JOB_TRACE = JOB_TRACE = 4;
-  Tile.JOB_RENDER = JOB_RENDER = 8;
+  Tile.JOB_RENDER = JOB_RENDER = 1;
+  Tile.JOB_PRUNE = JOB_PRUNE = 2;
+  Tile.JOB_PRESIZE = JOB_PRESIZE = 4;
+  Tile.JOB_TRACE = JOB_TRACE = 8;
 
   // Global Child Flow Flags
   Tile.FLOW_LOCAL = FLOW_LOCAL = 1;      // Set when local options change (by schema.local{}) -> use during flow to re-layout
@@ -541,9 +541,14 @@ Tile.Schema = function(localBindings, childBindings) {
 
       cycles = 3;
 
+//console.log("DISPATCH---------------------");
       // reflow job queue loop
       while (cycles-- && jobs) {
         for (var type in queues) {
+
+//if (cycles < 3) {
+//  console.log("CYCLES", cycles, type, queues[type].jobs.length, jobs);
+//}
           runQueue(type, queues[type]);
         }
         // start the depth-first flow tree traversal
@@ -555,7 +560,7 @@ Tile.Schema = function(localBindings, childBindings) {
       // check for loop overflow
       if (!cycles) {
         console.error('Reflow Dispatch Cycle Overflow');
-        console.trace();
+        //console.trace();
       }
       cycles = 0;
 
@@ -1396,9 +1401,8 @@ Tile.Schema = function(localBindings, childBindings) {
           view.type = this.childType;
         }
         // look-up the view type
-        if (_.isString(view.type)) {
-          Type = Tile.Views[view.type];
-        }
+        Type = Tile.Views[view.type] || view.type;
+        
         // default to loader if not valid
         if (!_.isFunction(Type)) {
           Type = Tile.Loader;

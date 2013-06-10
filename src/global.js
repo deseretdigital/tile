@@ -8,10 +8,10 @@
    */
 
   // Global Job Flags
-  Tile.JOB_PRUNE = JOB_PRUNE = 1;
-  Tile.JOB_PRESIZE = JOB_PRESIZE = 2;
-  Tile.JOB_TRACE = JOB_TRACE = 4;
-  Tile.JOB_RENDER = JOB_RENDER = 8;
+  Tile.JOB_RENDER = JOB_RENDER = 1;
+  Tile.JOB_PRUNE = JOB_PRUNE = 2;
+  Tile.JOB_PRESIZE = JOB_PRESIZE = 4;
+  Tile.JOB_TRACE = JOB_TRACE = 8;
 
   // Global Child Flow Flags
   Tile.FLOW_LOCAL = FLOW_LOCAL = 1;      // Set when local options change (by schema.local{}) -> use during flow to re-layout

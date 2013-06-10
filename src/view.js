@@ -358,9 +358,8 @@
           view.type = this.childType;
         }
         // look-up the view type
-        if (_.isString(view.type)) {
-          Type = Tile.Views[view.type];
-        }
+        Type = Tile.Views[view.type] || view.type;
+        
         // default to loader if not valid
         if (!_.isFunction(Type)) {
           Type = Tile.Loader;

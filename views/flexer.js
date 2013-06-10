@@ -158,8 +158,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         , flowCross
         , pad
         , val
-        , dims
-        ;
+        , dims;
 
       // ------------------------------------------------------------------
       //    Calculate the Flex Direction Values
@@ -267,7 +266,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         //    Set the child CSS Geometry
         // ------------------------------------------------------------------
 
-        view.$el.css(row ? {
+        this.setCSS(view, row, row ? {
           width: innerSize,
           height: crossSize,
           left: offset,
@@ -302,6 +301,13 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         }
         view.flow(dims);
       }
+    },
+
+    /**
+     * Set the css (useful for subclassing)
+     */
+    setCSS: function(view, row, css) {
+      view.$el.css(css);
     }
 
   });

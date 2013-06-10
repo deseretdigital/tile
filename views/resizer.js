@@ -19,7 +19,8 @@ define([
       isEdge: true,
       type: '_edge',
       options: {
-        flex: false
+        flex: false,
+        size: 7
       }
     });
 
@@ -94,6 +95,16 @@ define([
         }
       }
       return views;
+    },
+
+    /**
+     * Set CSS
+     */
+    setCSS: function(view, row, css) {
+      if (view.isEdge) {
+        css.cursor = row ? 'col-resize' : 'row-resize';
+      }
+      view.$el.css(css);
     },
 
     /**
