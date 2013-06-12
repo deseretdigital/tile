@@ -120,7 +120,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         if (flags & Tile.RENDERED_ADDED
           && (options._mode == FIXED_AUTO || this.options.align != 3)) {
 
-          child.measureInner();
+          child.measureView();
 
           // If measurement is different than known size, flag re-layout
           if (flags & Tile.FLOW_SIZED) {

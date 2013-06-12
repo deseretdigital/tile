@@ -13,32 +13,29 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
      * Drop views, model & collection by default
      * - widgets can add these back if they want.
      */
-    optionsSchema: Tile.View.prototype.optionSchema.extend({
+    optionSchema: Flexer.prototype.optionSchema.extend({
       views: false,
       model: false,
-      collection: false
+      collection: false,
+      prune: false,
+      axis: {
+        defaultValue: 2,
+        isPrivate: true
+      }
     }),
 
     /**
      * Add the Widget head and menu
      */
     initialize: function(options) {
-      /*
-      this.addView({
+      this.addView([{
         type: 'layouts/head',
-        title: 'Widget Title',
-        flex: false
-      });
-      */
+        title: 'Widget Title'
+      },{
+        type: 'layouts/test',
+        flex: true
+      }]);
       this.optionSchema.initOptions(this);
-    },
-
-    /**
-     * Default Render Function
-     */
-    render: function() {
-      this.$el.html("THIS IS A WIDGET");
-      return this;
     }
 
   });

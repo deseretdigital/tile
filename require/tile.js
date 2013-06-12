@@ -5,7 +5,7 @@ define(['Tile'], function(Tile) {
    */
   function error(onload, err) {
     onload.error(err);
-    console.log("Error Loading View", err.type);
+    console.log('Error Loading View: "' + err.path + '"', err.type);
   }
 
   /**
@@ -34,16 +34,17 @@ define(['Tile'], function(Tile) {
         onload(View);
 
       // There was an error loading the tile...
-      }, function(err) {
+      }
+      /*
+      , function(err) {
         error(onload, {
           type: err.requireType,
           name: name,
           path: path
         });
-       console.log("C",path);
-       //console.trace();
-       console.log("REQUIRE LOAD ERROR", err);
-      });
+      }
+      */
+      );
     }
   };
 

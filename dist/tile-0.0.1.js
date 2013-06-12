@@ -346,11 +346,11 @@ Tile.Schema = function(localBindings, childBindings) {
 
           // found filter in the local scope
           if ((binding = local[name])) {
-            changes += importOption(view, binding, value);
+            changes += importOption(name, view, binding, value);
           }
           // found filter in parent scope
           else if (pchild && (binding = pchild[name])) {
-            changes += importOption(view, binding, value);
+            changes += importOption(name, view, binding, value);
           }
           // didn't find, so store in option buffer
           else {
@@ -390,13 +390,13 @@ Tile.Schema = function(localBindings, childBindings) {
 
         // found buffered option
         if ((value = buffer[name]) !== undefined)  {
-          importOption(view, binding, value);
+          importOption(name, view, binding, value);
           delete buffer[name];
         }
         // no existing option, but there is a default (setup)
         else if (options[name] === undefined
           && ((value = binding.defaultValue) !== undefined)) {
-            importOption(view, binding, value, true);
+            importOption(name, view, binding, value, true);
         }
       }
     }
@@ -405,12 +405,13 @@ Tile.Schema = function(localBindings, childBindings) {
      * Import an Option
      *
      * @private
+     * @param {string} name
      * @param {object} view
      * @param {object} binding
      * @param {*} value
      * @param {boolean} noFilter (Don't filter value - for default value)
      */
-    function importOption(view, binding, value, noFilter) {
+    function importOption(name, view, binding, value, noFilter) {
       var input, flag, job;
 
       // Filter the input value
@@ -1833,11 +1834,17 @@ Tile.Schema = function(localBindings, childBindings) {
 
   var Loader = Tile.Loader = Tile.View.extend({
 
+    _configure: function(options) {
+      this.optionBuffer = {};
+      this.options = {};
+      this.childViews = [];
+    },
+
     initialize: function(options) {
       var that = this;
-      
+
       require(['tile!' + options.type],
-        function(Tile) {
+        function() {
           that.replaceWith(options);
         },
         function(error) {
