@@ -10,7 +10,8 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
     className: 'tile head',
 
     options: {
-      flex: false
+      flex: false,
+      drag: true
     },
 
     // Set the drag.tile to parent widget

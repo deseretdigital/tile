@@ -164,7 +164,7 @@
 
       // Turn a jquery element into a dragger tile
       // (NEED TO TEST FOR DOM ELEMENT TOO)
-      if (isJQuery(tile)) {
+      if (tile instanceof jQuery) {
         tile = {
           type: Tile.Dragger,
           spawner: this.origin,
@@ -173,15 +173,21 @@
       }
       // Make a copy of a tile
       // (IS THIS REALLY WHAT WE WANT HERE?)
-      else if (isTile(tile) && this.copyable) {
+      else if (tile instanceof Tile.View && this.copyable) {
         tile = tile.get();
       }
       // Attach the tile to the root context
       if (_.isObject(tile)) {
-        tile = root.addTile(tile);
-        tile.set('position', 'offset');
-        this.tileX = tile.x;
-        this.tileY = tile.y;
+        var offset = tile.$el.offset();
+
+        root.addView(tile, undefined, {
+          mode: 'offset',
+          width: tile.$el.width(),
+          height: tile.$el.height(),
+          x: (this.tileX = offset.left),
+          y: (this.tileY = offset.top)
+        });
+
         return tile;
       }
       return null;

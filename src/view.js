@@ -25,6 +25,10 @@
         adapter: 'property',
         isPrivate: true
       },
+      drag: {
+        adapter: 'setter',
+        isPrivate: true
+      },
       collection: {
         adapter: 'property',
         isPrivate: true
