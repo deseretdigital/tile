@@ -138,9 +138,11 @@ define([
 
       vproto.detachView.call(this, view);
 
-      var edge = this.childViews[index * 2 - offset];
-      if (edge && edge.isEdge) {
-        edge.close();
+      if (!view.isEdge) {
+        var edge = this.childViews[index * 2 - offset];
+        if (edge && edge.isEdge) {
+          edge.close();
+        }
       }
       Tile.reflow.schedule(JOB_PRUNE, this);
     },
@@ -153,7 +155,13 @@ define([
      *  behavior might be desirable in some situations... but not most.
      */
     pruneView: function() {
-      if (this.shouldPrune()) {
+console.log("pruneView", this.cid, this.childViews.length, this.options.prune, this._isRunning);
+      if (this.childViews.length < 2
+        && this.parentView
+        && this.options.prune
+        && this._isRunning
+      ) {
+        console.log("pruning...", this.cid);
         if (this.childViews.length) {
           var move = this.childViews[0];
           if (!move.options.axis) {

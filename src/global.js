@@ -8,8 +8,8 @@
    */
 
   // Global Job Flags
-  Tile.JOB_RENDER = JOB_RENDER = 1;
-  Tile.JOB_PRUNE = JOB_PRUNE = 2;
+  Tile.JOB_PRUNE = JOB_PRUNE = 1;
+  Tile.JOB_RENDER = JOB_RENDER = 2;
   Tile.JOB_PRESIZE = JOB_PRESIZE = 4;
   Tile.JOB_TRACE = JOB_TRACE = 8;
 

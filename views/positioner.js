@@ -147,7 +147,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
      */
     layout: function() {
       var sized = this.flowFlags & FLOW_SIZED ? true : false
-        , views = sized ? this.childViews : this.flowViews
+        , views = sized ? this.childViews : (this.flowViews || this.childViews)
         , width = this.options.innerWidth
         , height = this.options.innerHeight;
 

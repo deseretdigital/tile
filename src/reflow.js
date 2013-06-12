@@ -63,8 +63,14 @@
      * @param {object} view to callback
      */
     function schedule(job, view, silent) {
-//var jobname = job == 1 ? 'prune' : job == 2 ? 'presize' : 'trace';
-//console.log("REFLOW.schedule(", jobname, ",", view.cid, ")");
+/*
+var jobnames = '';
+if (job & Tile.JOB_RENDER) jobnames += ' JOB_RENDER';
+if (job & Tile.JOB_PRUNE) jobnames += ' JOB_PRUNE';
+if (job & Tile.JOB_PRESIZE) jobnames += ' JOB_PRESIZE';
+if (job & Tile.JOB_TRACE) jobnames += ' JOB_TRACE';
+console.log("REFLOW.schedule(", jobnames, ",", view.cid, ")");
+*/
       if (!(view.flowJobs & job)) {
         view.flowJobs |= job;
         queues[job].jobs.push(view);
@@ -86,6 +92,7 @@
 
       // reflow job queue loop
       while (cycles-- && jobs) {
+//console.log("REFLOW_DISPATCH_CYCLE", cycles);
         for (var type in queues) {
           runQueue(type, queues[type]);
         }
@@ -117,10 +124,10 @@
     function runQueue(flag, queue) {
       var qjobs = queue.jobs
         , method = queue.method;
+//console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length);
 
       if (!qjobs.length) return;
 
-//      console.log("reflow.runQueue(" + method + ") len=" + qjobs.length);
 //      console.time('DISPATCH_TIME');
       for (var i = 0; i < qjobs.length; i++, jobs--) {
         var view = qjobs[i];

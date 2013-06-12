@@ -22,7 +22,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
     // Render the header
     render: function() {
       this.$el.html(
-        '<a href="#" class="close">x</a><h2>' + 'test' + '</h2>'
+        '<a href="#" class="close">x</a><h2>' + this.parentView.cid + '</h2>'
       );
       return this;
     },
