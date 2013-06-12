@@ -42,11 +42,11 @@ define([
       this.$cover = $('<div class="cover" />');
 
       // Immediately measure but don't trigger reflow
-      this.measureInner(true);
+      this.measureView(true);
 
       // Bind to window resize
       $(window).resize(function() {
-        that.measureInner();
+        that.measureView();
       });
 
       // Bind to mouse-down - return false on drag to prevent scrolling
@@ -72,7 +72,7 @@ define([
     /**
      * Measure the inner size of the view
      */
-    measureInner: function(silent) {
+    measureView: function(silent) {
       return this.set({
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight

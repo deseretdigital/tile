@@ -34,7 +34,7 @@ define(['Tile'], function(Tile) {
         onload(View);
 
       // There was an error loading the tile...
-      }/*, function(err) {
+      }, function(err) {
         error(onload, {
           type: err.requireType,
           name: name,
@@ -43,7 +43,7 @@ define(['Tile'], function(Tile) {
        console.log("C",path);
        //console.trace();
        console.log("REQUIRE LOAD ERROR", err);
-      }*/);
+      });
     }
   };
 

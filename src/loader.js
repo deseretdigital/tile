@@ -7,7 +7,7 @@
 
     initialize: function(options) {
       var that = this;
-
+      
       require(['tile!' + options.type],
         function(Tile) {
           that.replaceWith(options);

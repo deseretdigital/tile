@@ -40,8 +40,8 @@
      */
     function scrollSize(view) {
       return {
-        scrollWidth: view.$el.width(), // <<<<<<<<<<<<<<<<< NOT RIGHT
-        scrollHeight: view.$el.height() // <<<<<<<<<<<<<<<< NOT RIGHT
+        innerWidth: view.el.scrollWidth,
+        innerHeight: view.el.scrollHeight
       }
     }
 

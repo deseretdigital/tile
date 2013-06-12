@@ -136,16 +136,13 @@ define([
       var index = this.indexOf(view)
         , offset = (index < (this.childCount() - 1) ? 0 : 1);
 
-console.log("detachView", view.cid);
       vproto.detachView.call(this, view);
 
       var edge = this.childViews[index * 2 - offset];
       if (edge && edge.isEdge) {
-        console.log("detachEdge", edge.cid);
         edge.close();
-        //vproto.detachView.call(this, edge); //.close();
       }
-     // Tile.reflow.schedule(JOB_PRUNE, this);
+      Tile.reflow.schedule(JOB_PRUNE, this);
     },
 
     /**

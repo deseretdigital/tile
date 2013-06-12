@@ -41,18 +41,6 @@
         isPrivate: true,
         defaultValue: 0
       },
-      scrollWidth: {
-        adapter: 'options',
-        flowFlags: FLOW_SIZED,
-        isPrivate: true,
-        defaultValue: 0
-      },
-      scrollHeight: {
-        adapter: 'options',
-        flowFlags: FLOW_SIZED,
-        isPrivate: true,
-        defaultValue: 0
-      },
       padWidth: {
         adapter: 'options',
         flowFlags: FLOW_SIZED,
@@ -258,17 +246,19 @@
      * @param {object} extend (extend tile options / optional)
      */
     addView: function(view, index, extend) {
-      Tile.reflow.block();
+      if (view) {
+        Tile.reflow.block();
 
-      // add a single view
-      if (!_.isArray(view)) {
-        this._attachView(this._toView(view, extend), index);
+        // add a single view
+        if (!_.isArray(view)) {
+          this._attachView(this._toView(view, extend), index);
+        }
+        // add multiple views
+        else for (var i = 0, l = view.length; i < l; i++) {
+          this._attachView(this._toView(view[i], extend), index);
+        }
+        Tile.reflow.unblock();
       }
-      // add multiple views
-      else for (var i = 0, l = view.length; i < l; i++) {
-        this._attachView(this._toView(view[i], extend), index);
-      }
-      Tile.reflow.unblock();
     },
 
     /**
@@ -563,10 +553,7 @@
      * @param {object} child (child view of the change)
      * @return {boolean} true = stop bubbling
      */
-    traceChange: function(orig, child, depth) {
- //     console.log("-----> traceChange(",this.cid, depth, ")", this.parentView ? this.parentView.cid : 'noparent');
-      // - Call this.measureInner || this.measureScroll when depth == 1 ????
-    },
+    traceChange: function(orig, child, depth) {},
 
     /**
      * Flow all changes down the tree
@@ -595,17 +582,11 @@
     // -----------------------------------------------------------------------
 
     /**
-     * Measure the scroll size of the view
-     */
-    measureScroll: function() {
-      var size = Tile.dom.scrollSize(this);
-      return this.set(size, true);
-    },
-
-    /**
      * Measure the inner size of the view
+     *
+     * @param {boolean} scroll = true for scroll size instead of inner
      */
-    measureInner: function() {
+    measureView: function() {
       var size = Tile.dom.innerSize(this);
       return this.set(size, true);
     },

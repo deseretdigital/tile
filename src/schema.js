@@ -49,9 +49,15 @@
         , adapter = Tile.adapters[aname]
         , filter, props, bindOut;
 
+      // if binding is boolean false, drop it.
+      if (bindIn === false) {
+        return;
+      }
+      // if binding is already bound, copy it verbatim.
       if (bindIn._bound) {
         bindOut = bindIn;
       }
+      // if binding is new, build the binding object.
       else {
         // add the name to the bindIn
         bindIn.name = name;
@@ -64,7 +70,7 @@
           defaultValue: bindIn.defaultValue
         };
 
-        // add the input & output filters to the bindIn
+        // add the input & output filters to the binding
         if (bindIn.filter && (filter = Tile.filters[bindIn.filter])) {
           props = filter(bindIn);
           bindOut.filter = bindIn.filter;
@@ -72,7 +78,7 @@
           if (!bindIn.output) bindOut.output = props.output;
         }
 
-        // ensure there is a bindIn type
+        // ensure there is a binding type
         bindIn.adapter || (bindIn.adapter = 'options');
         if (!adapter) {
           console.error("Adapter " + aname + " on schema.option." + name);

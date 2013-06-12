@@ -1,4 +1,4 @@
-/*! tile - v0.0.1 - 2013-06-10 */
+/*! tile - v0.0.1 - 2013-06-12 */
 define(['jQuery', 'Underscore', 'Backbone'],
   function($, _, Backbone) {
 
@@ -283,9 +283,15 @@ Tile.Schema = function(localBindings, childBindings) {
         , adapter = Tile.adapters[aname]
         , filter, props, bindOut;
 
+      // if binding is boolean false, drop it.
+      if (bindIn === false) {
+        return;
+      }
+      // if binding is already bound, copy it verbatim.
       if (bindIn._bound) {
         bindOut = bindIn;
       }
+      // if binding is new, build the binding object.
       else {
         // add the name to the bindIn
         bindIn.name = name;
@@ -298,7 +304,7 @@ Tile.Schema = function(localBindings, childBindings) {
           defaultValue: bindIn.defaultValue
         };
 
-        // add the input & output filters to the bindIn
+        // add the input & output filters to the binding
         if (bindIn.filter && (filter = Tile.filters[bindIn.filter])) {
           props = filter(bindIn);
           bindOut.filter = bindIn.filter;
@@ -306,7 +312,7 @@ Tile.Schema = function(localBindings, childBindings) {
           if (!bindIn.output) bindOut.output = props.output;
         }
 
-        // ensure there is a bindIn type
+        // ensure there is a binding type
         bindIn.adapter || (bindIn.adapter = 'options');
         if (!adapter) {
           console.error("Adapter " + aname + " on schema.option." + name);
@@ -642,8 +648,8 @@ Tile.Schema = function(localBindings, childBindings) {
      */
     function scrollSize(view) {
       return {
-        scrollWidth: view.$el.width(), // <<<<<<<<<<<<<<<<< NOT RIGHT
-        scrollHeight: view.$el.height() // <<<<<<<<<<<<<<<< NOT RIGHT
+        innerWidth: view.el.scrollWidth,
+        innerHeight: view.el.scrollHeight
       }
     }
 
@@ -1079,18 +1085,6 @@ Tile.Schema = function(localBindings, childBindings) {
         isPrivate: true,
         defaultValue: 0
       },
-      scrollWidth: {
-        adapter: 'options',
-        flowFlags: FLOW_SIZED,
-        isPrivate: true,
-        defaultValue: 0
-      },
-      scrollHeight: {
-        adapter: 'options',
-        flowFlags: FLOW_SIZED,
-        isPrivate: true,
-        defaultValue: 0
-      },
       padWidth: {
         adapter: 'options',
         flowFlags: FLOW_SIZED,
@@ -1296,17 +1290,19 @@ Tile.Schema = function(localBindings, childBindings) {
      * @param {object} extend (extend tile options / optional)
      */
     addView: function(view, index, extend) {
-      Tile.reflow.block();
+      if (view) {
+        Tile.reflow.block();
 
-      // add a single view
-      if (!_.isArray(view)) {
-        this._attachView(this._toView(view, extend), index);
+        // add a single view
+        if (!_.isArray(view)) {
+          this._attachView(this._toView(view, extend), index);
+        }
+        // add multiple views
+        else for (var i = 0, l = view.length; i < l; i++) {
+          this._attachView(this._toView(view[i], extend), index);
+        }
+        Tile.reflow.unblock();
       }
-      // add multiple views
-      else for (var i = 0, l = view.length; i < l; i++) {
-        this._attachView(this._toView(view[i], extend), index);
-      }
-      Tile.reflow.unblock();
     },
 
     /**
@@ -1601,10 +1597,7 @@ Tile.Schema = function(localBindings, childBindings) {
      * @param {object} child (child view of the change)
      * @return {boolean} true = stop bubbling
      */
-    traceChange: function(orig, child, depth) {
- //     console.log("-----> traceChange(",this.cid, depth, ")", this.parentView ? this.parentView.cid : 'noparent');
-      // - Call this.measureInner || this.measureScroll when depth == 1 ????
-    },
+    traceChange: function(orig, child, depth) {},
 
     /**
      * Flow all changes down the tree
@@ -1633,17 +1626,11 @@ Tile.Schema = function(localBindings, childBindings) {
     // -----------------------------------------------------------------------
 
     /**
-     * Measure the scroll size of the view
-     */
-    measureScroll: function() {
-      var size = Tile.dom.scrollSize(this);
-      return this.set(size, true);
-    },
-
-    /**
      * Measure the inner size of the view
+     *
+     * @param {boolean} scroll = true for scroll size instead of inner
      */
-    measureInner: function() {
+    measureView: function() {
       var size = Tile.dom.innerSize(this);
       return this.set(size, true);
     },
@@ -1848,7 +1835,7 @@ Tile.Schema = function(localBindings, childBindings) {
 
     initialize: function(options) {
       var that = this;
-
+      
       require(['tile!' + options.type],
         function(Tile) {
           that.replaceWith(options);

@@ -137,7 +137,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
             && !(child.flowFlags & FLOW_MEASURED)) {
 
           child.flowFlags |= FLOW_MEASURED;
-          child.measureInner();
+          child.measureView();
         }
       }
     },
