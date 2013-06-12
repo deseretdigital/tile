@@ -62,14 +62,14 @@ a {
   overflow: hidden;
   overflow: hidden; }
 
-.header {
+.head {
   height: 20px;
   background-color: #000;
   cursor: move;
   color: #ccc;
   letter-spacing: .3em; }
 
-.header h2 {
+.head h2 {
   font-weight: bold;
   font-size: 12px;
   height: 1.2em;
@@ -78,7 +78,7 @@ a {
   display: block;
   color: #777; }
 
-.header > a {
+.head > a {
   font-family: tahoma;
   font-size: 12px;
   display: block;
@@ -86,11 +86,11 @@ a {
   color: #fff;
   padding: 2px 3px 0 0; }
 
-.navbar {
+.header {
   color: #fff;
   padding: 7px;
   font-weight: bold;
-  height: 70px; }
+  height: 50px; }
 
 .menu {
   background-color: #ddd;
