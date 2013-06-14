@@ -1,6 +1,8 @@
 define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
   function($, _, Backbone, Tile, Flexer) {
 
+  var round	= Math.round;
+
   // ------------------------------------------------------------------------
   //    TILE : TEST
   // ------------------------------------------------------------------------
@@ -8,6 +10,13 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
   var Widget = Flexer.extend({
 
     className: 'tile widget',
+
+    /**
+     * Global Widgets Object
+     */
+    _widgets: {
+      $cover: null
+    },
 
     /**
      * Drop views, model & collection by default
@@ -20,6 +29,11 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
       prune: false,
       axis: {
         defaultValue: 2,
+        isPrivate: true
+      },
+      drop: {
+        adapter: 'setter',
+        defaultValue: true,
         isPrivate: true
       }
     }),

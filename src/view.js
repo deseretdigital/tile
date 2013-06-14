@@ -29,6 +29,10 @@
         adapter: 'setter',
         isPrivate: true
       },
+      drop: {
+        adapter: 'setter',
+        isPrivate: true
+      },
       collection: {
         adapter: 'property',
         isPrivate: true
@@ -629,6 +633,16 @@
      */
     setDrag: function(state) {
       this.$el.toggleClass('drag', this.options.drag = state);
+    },
+
+    /**
+     * Make the tile draggable
+     *
+     * NOTE: all this does is add a .drag class to the element
+     * NOTE: manually add .drag class to any element to make draggable
+     */
+    setDrop: function(state) {
+      this.$el.toggleClass('drop', this.options.drop = state);
     },
 
     /**

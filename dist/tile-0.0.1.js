@@ -936,7 +936,7 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
 
     zoneInit: function(ev, dd, index) {
       // Determine if this is a valid drop-zone
-      if (this.drop && this != dd.tile && this.dropInit(ev, dd)) {
+      if (this.options.drop && this != dd.tile && this.dropInit(ev, dd)) {
         var off = this.$el.offset()
           , zindex = this.$el.css('zIndex');
 
@@ -1087,6 +1087,10 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
         isPrivate: true
       },
       drag: {
+        adapter: 'setter',
+        isPrivate: true
+      },
+      drop: {
         adapter: 'setter',
         isPrivate: true
       },
@@ -1690,6 +1694,16 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
      */
     setDrag: function(state) {
       this.$el.toggleClass('drag', this.options.drag = state);
+    },
+
+    /**
+     * Make the tile draggable
+     *
+     * NOTE: all this does is add a .drag class to the element
+     * NOTE: manually add .drag class to any element to make draggable
+     */
+    setDrop: function(state) {
+      this.$el.toggleClass('drop', this.options.drop = state);
     },
 
     /**

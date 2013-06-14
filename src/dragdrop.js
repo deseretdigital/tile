@@ -200,7 +200,7 @@
 
     zoneInit: function(ev, dd, index) {
       // Determine if this is a valid drop-zone
-      if (this.drop && this != dd.tile && this.dropInit(ev, dd)) {
+      if (this.options.drop && this != dd.tile && this.dropInit(ev, dd)) {
         var off = this.$el.offset()
           , zindex = this.$el.css('zIndex');
 
