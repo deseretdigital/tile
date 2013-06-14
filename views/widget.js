@@ -69,6 +69,7 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
 
     //  the drop-zones
     dropInit: function(ev, dd) {
+      console.log("DROPINIT");
       if (dd.tile instanceof Widget && this.parentView != Tile.root) {
         if (!this._widgets.$cover) {
           this._widgets.$cover = $('<div class="drop-cover">'

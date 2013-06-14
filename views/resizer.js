@@ -155,13 +155,13 @@ define([
      *  behavior might be desirable in some situations... but not most.
      */
     pruneView: function() {
-console.log("pruneView", this.cid, this.childViews.length, this.options.prune, this._isRunning);
+//console.log("pruneView", this.cid, this.childViews.length, this.options.prune, this._isRunning);
       if (this.childViews.length < 2
         && this.parentView
         && this.options.prune
         && this._isRunning
       ) {
-        console.log("pruning...", this.cid);
+//        console.log("pruning...", this.cid);
         if (this.childViews.length) {
           var move = this.childViews[0];
           if (!move.options.axis) {

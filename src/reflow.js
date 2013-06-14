@@ -61,6 +61,7 @@
      *
      * @param {integer} job id flag of queue to add to
      * @param {object} view to callback
+     * @param {boolean} silent
      */
     function schedule(job, view, silent) {
 /*
@@ -124,8 +125,10 @@ console.log("REFLOW.schedule(", jobnames, ",", view.cid, ")");
     function runQueue(flag, queue) {
       var qjobs = queue.jobs
         , method = queue.method;
-//console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length);
-
+/*
+var ids = qjobs.length ? _.reduce(qjobs, function(memo, job) { return memo + ' ' + job.cid; }, '') : '';
+console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length + ids);
+*/
       if (!qjobs.length) return;
 
 //      console.time('DISPATCH_TIME');

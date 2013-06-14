@@ -1,4 +1,4 @@
-/*! tile - v0.0.1 - 2013-06-12 */
+/*! tile - v0.0.1 - 2013-06-13 */
 define(['jQuery', 'Underscore', 'Backbone'],
   function($, _, Backbone) {
 
@@ -525,6 +525,7 @@ Tile.Schema = function(localBindings, childBindings) {
      *
      * @param {integer} job id flag of queue to add to
      * @param {object} view to callback
+     * @param {boolean} silent
      */
     function schedule(job, view, silent) {
 /*
@@ -588,8 +589,10 @@ console.log("REFLOW.schedule(", jobnames, ",", view.cid, ")");
     function runQueue(flag, queue) {
       var qjobs = queue.jobs
         , method = queue.method;
-//console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length);
-
+/*
+var ids = qjobs.length ? _.reduce(qjobs, function(memo, job) { return memo + ' ' + job.cid; }, '') : '';
+console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length + ids);
+*/
       if (!qjobs.length) return;
 
 //      console.time('DISPATCH_TIME');
@@ -1589,9 +1592,9 @@ console.log("REFLOW.schedule(", jobnames, ",", view.cid, ")");
     traceBubble: function(orig, child, depth) {
 
       // add child to flowViews and flag tracing state
-      if (!(this.flowFlags & FLOW_TRACED)) {
+      if (!(child.flowFlags & FLOW_TRACED)) {
    //     console.log("ADDING TRACE BUBBLE", this.cid, child.cid, this.flowFlags);
-        this.flowFlags |= FLOW_TRACED;
+        child.flowFlags |= FLOW_TRACED;
         if (this.flowViews) this.flowViews.push(child)
         else this.flowViews = [child];
       } else {

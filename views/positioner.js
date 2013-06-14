@@ -150,6 +150,13 @@ define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
         , views = sized ? this.childViews : (this.flowViews || this.childViews)
         , width = this.options.innerWidth
         , height = this.options.innerHeight;
+/*
+c = '';
+if (this.flowViews) {
+  c = _.reduce(this.flowViews, function(m,v) { return m + ' ' + v.cid; }, 'views: ');
+}
+console.log("positioner...", this.flowFlags & FLOW_SIZED ? true : false, c);
+*/
 
       for (var i = 0, l = views.length; i < l; i++) {
         var view = views[i]

@@ -531,9 +531,9 @@
     traceBubble: function(orig, child, depth) {
 
       // add child to flowViews and flag tracing state
-      if (!(this.flowFlags & FLOW_TRACED)) {
+      if (!(child.flowFlags & FLOW_TRACED)) {
    //     console.log("ADDING TRACE BUBBLE", this.cid, child.cid, this.flowFlags);
-        this.flowFlags |= FLOW_TRACED;
+        child.flowFlags |= FLOW_TRACED;
         if (this.flowViews) this.flowViews.push(child)
         else this.flowViews = [child];
       } else {
