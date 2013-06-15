@@ -274,12 +274,7 @@ console.log("positioner...", this.flowFlags & FLOW_SIZED ? true : false, c);
         , width = options.width
         , height = options.height;
 
-      // Set position and size before rendering
-      view.$el.css({
-        position: 'absolute',
-        width: width,
-        height: height
-      });
+      var size = this.sizeView(options, style);
 
       // Render the tile before positioning
       //tile.render();
@@ -287,33 +282,31 @@ console.log("positioner...", this.flowFlags & FLOW_SIZED ? true : false, c);
       // Calculate the tile geometry
       var h = view.$el.outerHeight()
         , w = view.$el.outerWidth()
-        , x = this.xPos(options, tw, off.left, left)
-        , y = this.yPos(options, th, off.top, top)
+        , x = this.xPos(options, tw, off.left, left, pwidth)
+        , y = this.yPos(options, th, off.top, top, pheight)
         , overflow = options.overflow;
 
       // Rectify the positioning if overflowing edge of screen
-      if (this.rectify(w, x, this.width)) {
-        x = this.xPos(options, tw, off.left, left = !left);
+      if (this.rectify(w, x, pwidth)) {
+        x = this.xPos(options, tw, off.left, left = !left, pwidth);
       }
-      if (this.rectify(h, y, this.height)) {
-        y = this.yPos(options, th, off.top, top = !top);
+      if (this.rectify(h, y, pheight)) {
+        y = this.yPos(options, th, off.top, top = !top, pheight);
       }
 
       // Crop if still overflowing edge of screen
-      if (w + x > this.width) {
-        width = this.width - x - 10;
+      if (w + x > pwidth) {
+        width = pwidth - x - 10;
         overflow = 'auto';
       }
-      if (h + y > this.height) {
-        height = this.height - y - 10;
+      if (h + y > pheight) {
+        height = pheight - y - 10;
         overflow = 'auto';
       }
 
       // Set the tile geometry
       view.$el.css({
         overflow: overflow,
-        width: width,
-        height: height,
         top: top ? y : 'auto',
         bottom: top ? 'auto' : y,
         left: left ? x : 'auto',
@@ -328,15 +321,15 @@ console.log("positioner...", this.flowFlags & FLOW_SIZED ? true : false, c);
     },
 
     // Calculate Y coordinate
-    yPos: function(options, th, ty, top) {
-      return ((top ? ty + th : this.height - ty)
+    yPos: function(options, th, ty, top, pheight) {
+      return ((top ? ty + th : pheight - ty)
         + options.y - (options.axis ? th : 0)
       );
     },
 
     // Calculate X coordinate
-    xPos: function(options, tw, tx, left) {
-      return ((left ? tx : this.width - tx - tw)
+    xPos: function(options, tw, tx, left, pwidth) {
+      return ((left ? tx : pwidth - tx - tw)
         + options.x + (options.axis ? tw : 0)
       );
     },
