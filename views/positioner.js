@@ -276,9 +276,6 @@ console.log("positioner...", this.flowFlags & FLOW_SIZED ? true : false, c);
 
       var size = this.sizeView(options, style);
 
-      // Render the tile before positioning
-      //tile.render();
-
       // Calculate the tile geometry
       var h = view.$el.outerHeight()
         , w = view.$el.outerWidth()

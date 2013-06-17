@@ -1,6 +1,7 @@
 
  var Tile = window.Tile = {
-      Views: {}          // Prototypes (see Require.js dash view plugin)
+      Views: {},              // Prototypes (see Require.js dash view plugin)
+      clickoutViews: []       // Clickout Views
     };
 
   /**
@@ -68,7 +69,7 @@
       return "                                       ".slice(-length)
     }
 
-     stopEvent = function(ev) {
+    stopEvent = function(ev) {
       ev.cancelBubble = true;
       if (ev.stopPropagation) ev.stopPropagation();
     },

@@ -49,6 +49,11 @@ define([
         that.measureView();
       });
 
+      // Bind to Mousedown - For Clickout
+      this.addEvent(document, 'mousedown', function(ev) {
+        that.clickout(ev);
+      });
+
       // Bind to mouse-down - return false on drag to prevent scrolling
       $(document).on('mousedown touchstart', '.drag', function(ev) {
         if ((dd = new Tile.Dragdrop(ev)) && dd.handler) return false;
@@ -100,6 +105,29 @@ define([
      */
     getCover: function(value) {
       return this.cover;
+    },
+
+    /**
+     * Clickout Detection
+     *
+     * @param {object} ev (DOM Event)
+     */
+    clickout: function(ev) {
+      var ctiles = Tile.clickoutViews
+        , $target = $(ev.target)
+        , $tile = $target.closest('.tile')
+        , tile = $tile.data('tile')
+        , i = 0, ctile, clist;
+
+      // Deal with a clickout
+      if (ctiles.length && (!(ctile = tile.isClickIn())
+          || ((i = _.indexOf(ctiles, ctile) + 1) < ctiles.length))) {
+
+        clist = _.rest(ctiles, i);
+        while ((ctile = clist.pop())) {
+          if (ctile._running) ctile.onClickout();
+        }
+      }
     }
 
   });

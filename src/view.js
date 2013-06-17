@@ -21,8 +21,8 @@
       views: {
         adapter: 'setter'
       },
-      model: {
-        adapter: 'property',
+      spawner: {
+        adapter: 'setter',
         isPrivate: true
       },
       drag: {
@@ -31,6 +31,10 @@
       },
       drop: {
         adapter: 'setter',
+        isPrivate: true
+      },
+      model: {
+        adapter: 'property',
         isPrivate: true
       },
       collection: {
@@ -70,6 +74,10 @@
     parentView: null,             // {object} Parent View
     childViews: null,             // {array} Child Views
 
+    // Spawn Params
+    spawnerView: null,            // {object} Spawner View
+    spawnedViews: null,           // {array} Spawned Views
+
     // Reflow Params
     flowViews: null,              // {array} Reflow Traced Views
     flowFlags: 0,                 // {integer} Reflow State flags
@@ -81,6 +89,7 @@
     // Internal Bookkeeping
     _styleHash: null,             // {string} DOM tag & class path names
     _isRunning: true,             // {boolean} true if view hasn't closed
+    _isClickout: false,           // {boolean} true if detecting clickout
 
     // -----------------------------------------------------------------------
     //    Constructor and Destructor
@@ -103,9 +112,9 @@
     close: function(delspawned) {
       if (this._isRunning) {
         this._isRunning = false;
-        this.type = null; // in case type was constructor
+        this.type = null; // in case type is a constructor
         Tile.reflow.block();
-     //   this.despawn(delspawned);
+        this.despawn(delspawned);
         this.detachThis();
         this.setViews();
         Tile.reflow.unblock();
@@ -142,6 +151,7 @@
       this.optionBuffer = options;
       this.options = {};
       this.childViews = [];
+      this.spawnedViews = [];
     },
 
     /**
@@ -696,6 +706,108 @@
 
     // Finish the drop-zone
     dropFinish: function(ev, dd) {},
+
+    // ----------------------------------------------------------------------
+    //    CLICKOUT EVENT
+    // ----------------------------------------------------------------------
+
+    /**
+     * Set the clickout monitoring state
+     *
+     * @param {boolean} state
+     */
+    setClickout: function(state) {
+      var clickouts = Tile.clickoutViews;
+
+      if (state != this._isClickout) {
+        if ((this._isClickout = state)) {
+          clickouts.push(this);
+        } else {
+          clickouts = _.without(clickouts, this);
+        }
+      }
+    },
+
+    /**
+     * Is clicking on this tile a click-in?
+     *
+     * @return {object|null} self or ancestor clickout tile
+     */
+    isClickIn: function() {
+      var tile
+        , value = null;
+
+      if (this._isClickout) {
+        value = this;
+      }
+      if (this.parent && (tile = this.parent.isClickIn())) {
+        value = tile;
+      }
+      if (this.spawnerView && (tile = this.spawnerView.isClickIn())) {
+        value =  tile;
+      }
+
+      return value;
+    },
+
+    /**
+     * On Clickout action
+     */
+    onClickout: function() {},
+
+    // ----------------------------------------------------------------------
+    //    SPAWNED RELATIONSHIPS
+    // ----------------------------------------------------------------------
+
+    /**
+     * Set the spawner parent view
+     */
+    setSpawner: function(view) {
+      if (this.spawnerView) {
+        this.spawnerView.despawn(this);
+      }
+      if (view) {
+        this.spawnerView = view;
+        view.spawnedViews.push(this);
+      }
+    },
+
+    /**
+     * Spawn a child tile
+     *
+     * @param {object} tile
+     */
+    spawn: function(tile) {
+      Tile.root.addView(tile, undefined, {
+        mode: 'target',
+        target: this.$el,
+        spawner: this
+      });
+    },
+
+    /**
+     * Undo spawn relationships
+     *
+     * @param {tile} tile (use to detach child from this)
+     *        {undefined} tile (use to detach all children)
+     *        {true} tile (use to close all children)
+     */
+    despawn: function(tile) {
+      var spawned;
+
+      if (tile instanceof Tile.View) {
+        this.spawnedViews = _.without(this.spawnedViews, tile);
+        tile.spawnerView = null;
+      } else {
+        while ((spawned = this.spawnedViews.pop())) {
+          spawned.spawnerView = null;
+          if (tile === true) spawned.close();
+        }
+        if (this.spawnerView) {
+          this.spawnerView.despawn(this);
+        }
+      }
+    },
 
     // ----------------------------------------------------------------------
     //    EVENT CAPTURE - Instead of bubbling

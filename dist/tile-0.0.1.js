@@ -1,10 +1,11 @@
-/*! tile - v0.0.1 - 2013-06-13 */
+/*! tile - v0.0.1 - 2013-06-16 */
 define(['jQuery', 'Underscore', 'Backbone'],
   function($, _, Backbone) {
 
 
  var Tile = window.Tile = {
-      Views: {}          // Prototypes (see Require.js dash view plugin)
+      Views: {},              // Prototypes (see Require.js dash view plugin)
+      clickoutViews: []       // Clickout Views
     };
 
   /**
@@ -72,7 +73,7 @@ define(['jQuery', 'Underscore', 'Backbone'],
       return "                                       ".slice(-length)
     }
 
-     stopEvent = function(ev) {
+    stopEvent = function(ev) {
       ev.cancelBubble = true;
       if (ev.stopPropagation) ev.stopPropagation();
     },
@@ -897,36 +898,30 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
     // ----------------------------------------------------------------------
 
     prepTile: function(root, tile) {
+      var isTile = tile instanceof Tile.View
+        , $el = isTile ? tile.$el : tile;
 
-      // Turn a jquery element into a dragger tile
-      // (NEED TO TEST FOR DOM ELEMENT TOO)
-      if (tile instanceof jQuery) {
+      // Use dragger tile if copying tile or dragging jQuery element
+      if (!isTile || this.copyable) {
         tile = {
           type: Tile.Dragger,
           spawner: this.origin,
           dragData: this
         };
       }
-      // Make a copy of a tile
-      // (IS THIS REALLY WHAT WE WANT HERE?)
-      else if (tile instanceof Tile.View && this.copyable) {
-        tile = tile.get();
-      }
-      // Attach the tile to the root context
-      if (_.isObject(tile)) {
-        var offset = tile.$el.offset();
+      // capture the screen offset of the element
+      var offset = $el.offset();
 
-        root.addView(tile, undefined, {
-          mode: 'offset',
-          width: tile.$el.width(),
-          height: tile.$el.height(),
-          x: (this.tileX = offset.left),
-          y: (this.tileY = offset.top)
-        });
+      // add to the root view in offset mode
+      root.addView(tile, undefined, {
+        mode: 'offset',
+        width: $el.width(),
+        height: $el.height(),
+        x: (this.tileX = offset.left),
+        y: (this.tileY = offset.top)
+      });
 
-        return tile;
-      }
-      return null;
+      return tile;
     },
 
     // ----------------------------------------------------------------------
@@ -1082,8 +1077,8 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
       views: {
         adapter: 'setter'
       },
-      model: {
-        adapter: 'property',
+      spawner: {
+        adapter: 'setter',
         isPrivate: true
       },
       drag: {
@@ -1092,6 +1087,10 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
       },
       drop: {
         adapter: 'setter',
+        isPrivate: true
+      },
+      model: {
+        adapter: 'property',
         isPrivate: true
       },
       collection: {
@@ -1131,6 +1130,10 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
     parentView: null,             // {object} Parent View
     childViews: null,             // {array} Child Views
 
+    // Spawn Params
+    spawnerView: null,            // {object} Spawner View
+    spawnedViews: null,           // {array} Spawned Views
+
     // Reflow Params
     flowViews: null,              // {array} Reflow Traced Views
     flowFlags: 0,                 // {integer} Reflow State flags
@@ -1142,6 +1145,7 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
     // Internal Bookkeeping
     _styleHash: null,             // {string} DOM tag & class path names
     _isRunning: true,             // {boolean} true if view hasn't closed
+    _isClickout: false,           // {boolean} true if detecting clickout
 
     // -----------------------------------------------------------------------
     //    Constructor and Destructor
@@ -1164,9 +1168,9 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
     close: function(delspawned) {
       if (this._isRunning) {
         this._isRunning = false;
-        this.type = null; // in case type was constructor
+        this.type = null; // in case type is a constructor
         Tile.reflow.block();
-     //   this.despawn(delspawned);
+        this.despawn(delspawned);
         this.detachThis();
         this.setViews();
         Tile.reflow.unblock();
@@ -1203,6 +1207,7 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
       this.optionBuffer = options;
       this.options = {};
       this.childViews = [];
+      this.spawnedViews = [];
     },
 
     /**
@@ -1757,6 +1762,108 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
 
     // Finish the drop-zone
     dropFinish: function(ev, dd) {},
+
+    // ----------------------------------------------------------------------
+    //    CLICKOUT EVENT
+    // ----------------------------------------------------------------------
+
+    /**
+     * Set the clickout monitoring state
+     *
+     * @param {boolean} state
+     */
+    setClickout: function(state) {
+      var clickouts = Tile.clickoutViews;
+
+      if (state != this._isClickout) {
+        if ((this._isClickout = state)) {
+          clickouts.push(this);
+        } else {
+          clickouts = _.without(clickouts, this);
+        }
+      }
+    },
+
+    /**
+     * Is clicking on this tile a click-in?
+     *
+     * @return {object|null} self or ancestor clickout tile
+     */
+    isClickIn: function() {
+      var tile
+        , value = null;
+
+      if (this._isClickout) {
+        value = this;
+      }
+      if (this.parent && (tile = this.parent.isClickIn())) {
+        value = tile;
+      }
+      if (this.spawnerView && (tile = this.spawnerView.isClickIn())) {
+        value =  tile;
+      }
+
+      return value;
+    },
+
+    /**
+     * On Clickout action
+     */
+    onClickout: function() {},
+
+    // ----------------------------------------------------------------------
+    //    SPAWNED RELATIONSHIPS
+    // ----------------------------------------------------------------------
+
+    /**
+     * Set the spawner parent view
+     */
+    setSpawner: function(view) {
+      if (this.spawnerView) {
+        this.spawnerView.despawn(this);
+      }
+      if (view) {
+        this.spawnerView = view;
+        view.spawnedViews.push(this);
+      }
+    },
+
+    /**
+     * Spawn a child tile
+     *
+     * @param {object} tile
+     */
+    spawn: function(tile) {
+      Tile.root.addView(tile, undefined, {
+        mode: 'target',
+        target: this.$el,
+        spawner: this
+      });
+    },
+
+    /**
+     * Undo spawn relationships
+     *
+     * @param {tile} tile (use to detach child from this)
+     *        {undefined} tile (use to detach all children)
+     *        {true} tile (use to close all children)
+     */
+    despawn: function(tile) {
+      var spawned;
+
+      if (tile instanceof Tile.View) {
+        this.spawnedViews = _.without(this.spawnedViews, tile);
+        tile.spawnerView = null;
+      } else {
+        while ((spawned = this.spawnedViews.pop())) {
+          spawned.spawnerView = null;
+          if (tile === true) spawned.close();
+        }
+        if (this.spawnerView) {
+          this.spawnerView.despawn(this);
+        }
+      }
+    },
 
     // ----------------------------------------------------------------------
     //    EVENT CAPTURE - Instead of bubbling

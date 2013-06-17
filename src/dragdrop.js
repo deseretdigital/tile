@@ -161,36 +161,30 @@
     // ----------------------------------------------------------------------
 
     prepTile: function(root, tile) {
+      var isTile = tile instanceof Tile.View
+        , $el = isTile ? tile.$el : tile;
 
-      // Turn a jquery element into a dragger tile
-      // (NEED TO TEST FOR DOM ELEMENT TOO)
-      if (tile instanceof jQuery) {
+      // Use dragger tile if copying tile or dragging jQuery element
+      if (!isTile || this.copyable) {
         tile = {
           type: Tile.Dragger,
           spawner: this.origin,
           dragData: this
         };
       }
-      // Make a copy of a tile
-      // (IS THIS REALLY WHAT WE WANT HERE?)
-      else if (tile instanceof Tile.View && this.copyable) {
-        tile = tile.get();
-      }
-      // Attach the tile to the root context
-      if (_.isObject(tile)) {
-        var offset = tile.$el.offset();
+      // capture the screen offset of the element
+      var offset = $el.offset();
 
-        root.addView(tile, undefined, {
-          mode: 'offset',
-          width: tile.$el.width(),
-          height: tile.$el.height(),
-          x: (this.tileX = offset.left),
-          y: (this.tileY = offset.top)
-        });
+      // add to the root view in offset mode
+      root.addView(tile, undefined, {
+        mode: 'offset',
+        width: $el.width(),
+        height: $el.height(),
+        x: (this.tileX = offset.left),
+        y: (this.tileY = offset.top)
+      });
 
-        return tile;
-      }
-      return null;
+      return tile;
     },
 
     // ----------------------------------------------------------------------
