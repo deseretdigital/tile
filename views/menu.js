@@ -1,4 +1,4 @@
-define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/label'],
+define(['jquery', 'underscore', 'backbone', 'Tile', 'tile!layouts/label'],
     function($, _, Backbone, Tile, Label) {
 
         // ------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 define([
-  'jQuery',
-  'Underscore',
-  'Backbone',
+  'jquery',
+  'underscore',
+  'backbone',
   'Tile',
   'tile!layouts/flexer'
   ], function($, _, Backbone, Tile, Flexer) {

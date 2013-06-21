@@ -1,4 +1,4 @@
-define(['jQuery', 'Underscore', 'Backbone', 'Tile', 'tile!layouts/flexer'],
+define(['jquery', 'underscore', 'backbone', 'Tile', 'tile!layouts/flexer'],
   function($, _, Backbone, Tile, Flexer) {
 
   var round	= Math.round;

@@ -23,11 +23,8 @@ module.exports = function(grunt) {
       options: {
         separator: "\n",
         stripBanners: true,
-        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - '
-          + '<%= grunt.template.today("yyyy-mm-dd") %> */'
-          + "\ndefine(['jQuery', 'Underscore', 'Backbone'],\n"
-          + "  function($, _, Backbone) {\n\n",
-        footer: "\n  return Tile;\n\n});"
+        banner: grunt.file.read('src/tile-head.tpl'),
+        footer: grunt.file.read('src/tile-foot.tpl')
       },
       dist: {
         src: [

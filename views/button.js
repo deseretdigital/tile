@@ -1,4 +1,4 @@
-define(['jQuery', 'Underscore', 'Backbone', 'Tile'],
+define(['jquery', 'underscore', 'backbone', 'Tile'],
     function($, _, Backbone, Tile) {
 
         return Tile.View.extend({

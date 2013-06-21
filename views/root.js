@@ -1,7 +1,7 @@
 define([
-  'jQuery',
-  'Underscore',
-  'Backbone',
+  'jquery',
+  'underscore',
+  'backbone',
   'Tile',
   'tile!layouts/positioner'
   ], function($, _, Backbone, Tile, Positioner) {

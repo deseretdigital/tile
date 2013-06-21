@@ -1,7 +1,6 @@
-/*! tile - v0.0.1 - 2013-06-16 */
-define(['jQuery', 'Underscore', 'Backbone'],
-  function($, _, Backbone) {
-
+/*! tile - v0.0.1 - 2013-06-21 */
+;(function() {
+  function load($, _, Backbone) {
 
  var Tile = window.Tile = {
       Views: {},              // Prototypes (see Require.js dash view plugin)
@@ -2026,6 +2025,23 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
 
   });
 
-  return Tile;
+    return Tile;
 
-});
+  }
+
+  // Support AMD loaders
+  if(typeof define !== 'undefined' && define.amd) {
+    define(['jquery', 'underscore', 'backbone'], function($, _, Backbone) {
+    console.log($, _, Backbone);
+      return load($, _, Backbone);
+    });
+  } else if(typeof exports !== 'undefined') {
+    var $ = require('jquery'),
+        _ = require('_'),
+        Backbone = require('backbone');
+    if(!module) module = {};
+    exports = module.exports = load($, _, Backbone);
+  } else {
+    this.Tile = load(this.jQuery, this._, this.Backbone);
+  }
+}).call(this);
