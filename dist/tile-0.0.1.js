@@ -2031,7 +2031,7 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
 
   // Support AMD loaders
   if(typeof define !== 'undefined' && define.amd) {
-    define(['jQuery', 'Underscore', 'Backbone'], function($, _, Backbone) {
+    define(['jquery', 'underscore', 'backbone'], function($, _, Backbone) {
     console.log($, _, Backbone);
       return load($, _, Backbone);
     });
