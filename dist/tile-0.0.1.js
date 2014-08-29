@@ -1990,6 +1990,7 @@ console.log("------------->reflow.runQueue(" + method + ") len=" + qjobs.length 
         function(error) {
           options.error = error;
           that.replaceWith(new Tile.Error(options));
+          console.error(error);
         }
       );
     }
