@@ -21,6 +21,7 @@
         function(error) {
           options.error = error;
           that.replaceWith(new Tile.Error(options));
+          console.error(error);
         }
       );
     }
